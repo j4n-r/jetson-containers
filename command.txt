@@ -1,0 +1,1 @@
+jetson-containers build --name=ros2-onnxruntime onnxruntime:1.22 ros:jazzy-ros-core

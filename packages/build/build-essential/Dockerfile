@@ -6,6 +6,8 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+SHELL ["/bin/bash", "-c"]
+
 ENV DEBIAN_FRONTEND=noninteractive \
     LANGUAGE=en_US:en \
     LANG=en_US.UTF-8 \
@@ -14,6 +16,22 @@ ENV DEBIAN_FRONTEND=noninteractive \
     #TERM=dumb
 
 RUN set -ex \
+    \
+    # install enough tooling to refresh the ROS apt key/source
+    && apt-get update || true \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg \
+    \
+    # refresh ROS 2 repository signing key + source entry
+    && mkdir -p /usr/share/keyrings \
+    && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+        -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo ${UBUNTU_CODENAME}) main" \
+        > /etc/apt/sources.list.d/ros2.list \
+    \
+    # now do the normal install
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         locales \
@@ -44,7 +62,7 @@ RUN set -ex \
         libibverbs-dev \
         time \
         sshpass \
-        ssh-client \
+        openssh-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     \

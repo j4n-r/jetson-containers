@@ -90,6 +90,9 @@ else
     exit 1
 fi
 git submodule update --init --recursive
+# Fix GitLab dynamically changing the Eigen3 zip archive hash
+echo "Patching Eigen3 SHA1 hash..."
+find cmake -type f -exec sed -i 's/5ea4d05e62d7f954a46b3213f9b2535bdd866803/51982be81bbe52572b54180454df11a3ece9a934/g' {} +
 
 install_dir="/opt/onnxruntime/install"
 
